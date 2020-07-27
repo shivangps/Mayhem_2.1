@@ -20,6 +20,10 @@ protected:
 	Microsoft::WRL::ComPtr<ID3DBlob> vertexDXShader = nullptr;
 	Microsoft::WRL::ComPtr<ID3DBlob> pixelDXShader = nullptr;
 
+	unsigned int numberOfCBV = 0;
+	unsigned int numberOfSRV = 0;
+	unsigned int numberOfSlots = 0;
+
 	D3D12_STATIC_SAMPLER_DESC sampler = {};
 	std::vector<CD3DX12_ROOT_PARAMETER1> rootParameters = {};
 	CD3DX12_VERSIONED_ROOT_SIGNATURE_DESC rootSigDesc = {};

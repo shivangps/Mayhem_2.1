@@ -69,13 +69,19 @@ void DXShader::CreateDescriptorTable(Microsoft::WRL::ComPtr<ID3D12Device5> devic
 void DXShader::CreateConstantBufferTable(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numOfConstants)
 {
 	for (unsigned int i = 0; i < numOfConstants; i++)
-		this->CreateDescriptorTable(device, D3D12_DESCRIPTOR_RANGE_TYPE_CBV, i);
+	{
+		this->CreateDescriptorTable(device, D3D12_DESCRIPTOR_RANGE_TYPE_CBV, this->numberOfCBV++);
+		this->numberOfSlots++;
+	}
 }
 
 void DXShader::CreateTextureTable(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numOfTextures)
 {
 	for (unsigned int i = 0; i < numOfTextures; i++)
-		this->CreateDescriptorTable(device, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, i);
+	{
+		this->CreateDescriptorTable(device, D3D12_DESCRIPTOR_RANGE_TYPE_SRV, this->numberOfSRV++);
+		this->numberOfSlots++;
+	}
 }
 
 void DXShader::CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5> device, DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat)

@@ -100,3 +100,6 @@ void TransferResourceContent(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> 
 
 // Function to give the aggregate memory size for DirectX 12.
 unsigned int GetAggregateSize(unsigned int size);
+
+// Function to create constant buffer and get the pointer for updating the values in buffer.
+unsigned char* CreateConstantBuffer(Microsoft::WRL::ComPtr<ID3D12Device5> device, DXResource* resource, unsigned int size, D3D12_CPU_DESCRIPTOR_HANDLE handle, std::wstring name);

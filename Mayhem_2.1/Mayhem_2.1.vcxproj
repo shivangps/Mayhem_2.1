@@ -162,6 +162,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeaders.h" />
+    <ClInclude Include="Enum.h" />
     <ClInclude Include="Graphics\DXMesh.h" />
     <ClInclude Include="Graphics\d3dx12.h" />
     <ClInclude Include="Graphics\DXMeshSystem.h" />

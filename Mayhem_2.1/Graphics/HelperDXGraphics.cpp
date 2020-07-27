@@ -170,6 +170,25 @@ unsigned int GetAggregateSize(unsigned int size)
 	return ((size + 255) & ~255);
 }
 
+unsigned char* CreateConstantBuffer(Microsoft::WRL::ComPtr<ID3D12Device5> device, DXResource* resource, unsigned int size, D3D12_CPU_DESCRIPTOR_HANDLE handle, std::wstring name)
+{
+	resource->InitializeAsUpload(device, &CD3DX12_RESOURCE_DESC::Buffer(GetAggregateSize(size)), D3D12_RESOURCE_STATE_GENERIC_READ, nullptr);
+	resource->SetName(name.c_str());
+
+	D3D12_CONSTANT_BUFFER_VIEW_DESC constantBufferViewDesc = {};
+	constantBufferViewDesc.BufferLocation = resource->GetGPUVirtualAddress();
+	constantBufferViewDesc.SizeInBytes = GetAggregateSize(size);
+
+	device->CreateConstantBufferView(&constantBufferViewDesc, handle);
+
+	unsigned char* pDataBegin = nullptr;
+	CD3DX12_RANGE readRange = {};
+	resource->Map(0, &readRange, reinterpret_cast<void**>(&pDataBegin));
+	resource->Unmap(0, nullptr);
+
+	return pDataBegin;
+}
+
 D3D12_INPUT_ELEMENT_DESC DXVertex::inputEleDesc[3];
 unsigned int DXVertex::elements = 3;
 

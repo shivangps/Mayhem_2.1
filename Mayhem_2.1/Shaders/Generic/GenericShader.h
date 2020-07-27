@@ -1,18 +1,26 @@
 #pragma once
 #include "../Graphics/DXShader.h"
 
-namespace DXShaders
+namespace GenericShader
 {
-	// It is a single ton class to generic shader.
-	class GenericShader : public DXShader
+	typedef
+	enum Slot
 	{
-		GenericShader() {}
+		Saturation,
+		Matrix,
+		Texture
+	} Slot;
+
+	// It is a single ton class to generic shader.
+	class Shader : public DXShader
+	{
+		Shader() {}
 
 	public:
 		// Function to get a single instance of the class.
-		static GenericShader* GetInstance()
+		static Shader* GetInstance()
 		{
-			static GenericShader* instance = new GenericShader();
+			static Shader* instance = new Shader();
 			return instance;
 		}
 
