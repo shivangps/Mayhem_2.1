@@ -8,12 +8,12 @@ DXMesh::DXMesh(const Microsoft::WRL::ComPtr<ID3D12Device5> device, const Microso
 	this->SetupMesh(device, commandList);
 }
 
-void DXMesh::DrawWithoutTexture(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)
+void DXMesh::DrawWithoutTexture(unsigned int instances, const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)
 {
 	commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 	commandList->IASetVertexBuffers(0, 1, &this->vertexBufferView);
 	commandList->IASetIndexBuffer(&indexBufferView);
-	commandList->DrawIndexedInstanced(this->numOfIndices, 1, 0, 0, 0);
+	commandList->DrawIndexedInstanced(this->numOfIndices, instances, 0, 0, 0);
 }
 
 void DXMesh::SetupMesh(const Microsoft::WRL::ComPtr<ID3D12Device5> device, const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)

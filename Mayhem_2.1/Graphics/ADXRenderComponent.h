@@ -1,5 +1,6 @@
 #pragma once
 #include "DXMeshSystem.h"
+#include "DXTextureSystem.h"
 #include "../Shaders/ShaderCollectionHeader.h"
 #include "DXTexture.h"
 
@@ -22,9 +23,9 @@ public:
 	~ADXRenderComponent() {}
 
 private:
-	DXShader* shader;
+	DXShader* shader = nullptr;
 
-	DXTexture texture;
+	unsigned int texture = 0;
 
 	DXDescriptorHeap cbv_srv_heap = {};
 
@@ -41,9 +42,9 @@ private:
 public:
 	// Function to be called for initialization.
 	void Initialize(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList,
-		DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem);
+		DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem, DXTextureSystem* textureSystem);
 	// Function to initialize texture and constant buffers.
-	void InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
+	void InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXTextureSystem* textureSystem);
 	// Function to update constant buffers.
 	void UpdateState();
 	// Function to be called for updated drawing.

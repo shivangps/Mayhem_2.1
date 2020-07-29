@@ -1,18 +1,18 @@
 #include "ADXRenderComponent.h"
 
 void ADXRenderComponent::Initialize(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList,
-	DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem)
+	DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem, DXTextureSystem* textureSystem)
 {
 	this->application = Win32Application::GetInstance();
 
 	this->shader = GenericShader::Shader::GetInstance();
 	this->shader->Initilaize(device, renderTargetFormat, depthStencilFormat);
 
-	this->InitializeBuffers(device, commandList);
+	this->InitializeBuffers(device, commandList, textureSystem);
 	this->SetMeshIndex(meshSysytem->RegisterModel(device, commandList, "3DObjects/metaCube.obj"));
 }
 
-void ADXRenderComponent::InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)
+void ADXRenderComponent::InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXTextureSystem* textureSystem)
 {
 	//1. CREATE CBV & SRV DESCRIPTOR HEAP
 	//2. CREATE CONSTANT BUFFER VIEW
@@ -33,8 +33,8 @@ void ADXRenderComponent::InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5>
 
 	// Create shader resource view for texture buffer.
 	{
-		this->texture.Initialize(device, commandList, "Textures/White.jpg");
-		this->texture.CreateResourceView(device, this->cbv_srv_heap.GetCPUHandle(GenericShader::Texture));
+		this->texture = textureSystem->RegisterTexture(device, commandList, "Textures/White.jpg");
+		textureSystem->CreateResourceView(this->texture, device, this->cbv_srv_heap.GetCPUHandle(GenericShader::Texture));
 	}
 	return;
 }
@@ -52,7 +52,7 @@ void ADXRenderComponent::UpdateState()
 
 	// MODEL
 	model = DirectX::XMMatrixIdentity();
-	model = DirectX::XMMatrixRotationZ(time->GetCurrentStartTime() / 1000.0f) * model;
+	//model = DirectX::XMMatrixRotationZ(time->GetCurrentStartTime() / 1000.0f) * model;
 	model = DirectX::XMMatrixRotationX(time->GetCurrentStartTime() / 1000.0f) * model;
 	model = DirectX::XMMatrixRotationY(time->GetCurrentStartTime() / 1000.0f) * model;
 

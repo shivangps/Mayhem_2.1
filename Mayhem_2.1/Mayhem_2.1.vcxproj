@@ -154,6 +154,7 @@
     <ClCompile Include="Graphics\DXRenderEngine.cpp" />
     <ClCompile Include="Graphics\DXShader.cpp" />
     <ClCompile Include="Graphics\DXTexture.cpp" />
+    <ClCompile Include="Graphics\DXTextureSystem.cpp" />
     <ClCompile Include="Graphics\HelperDXGraphics.cpp" />
     <ClCompile Include="Main.cpp" />
     <ClCompile Include="Shaders\Generic\GenericShader.cpp" />
@@ -162,7 +163,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="CommonHeaders.h" />
-    <ClInclude Include="Enum.h" />
     <ClInclude Include="Graphics\DXMesh.h" />
     <ClInclude Include="Graphics\d3dx12.h" />
     <ClInclude Include="Graphics\DXMeshSystem.h" />
@@ -170,6 +170,7 @@
     <ClInclude Include="GameEngine.h" />
     <ClInclude Include="Graphics\DXShader.h" />
     <ClInclude Include="Graphics\DXTexture.h" />
+    <ClInclude Include="Graphics\DXTextureSystem.h" />
     <ClInclude Include="Graphics\GraphicsHeader.h" />
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Graphics\HelperDXGraphics.h" />

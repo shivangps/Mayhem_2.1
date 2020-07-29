@@ -30,10 +30,10 @@ private:
 	Microsoft::WRL::ComPtr<IDXGIAdapter1> pAdapter = nullptr;
 	static Microsoft::WRL::ComPtr<ID3D12Device5> device;
 
-	D3D12_COMMAND_LIST_TYPE commandListType = D3D12_COMMAND_LIST_TYPE_DIRECT;
+	D3D12_COMMAND_LIST_TYPE mainCommandListType = D3D12_COMMAND_LIST_TYPE_DIRECT;
 	Microsoft::WRL::ComPtr<ID3D12CommandQueue> commandQueue = nullptr;
 	Microsoft::WRL::ComPtr<ID3D12CommandAllocator> commandAllocator = nullptr;
-	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList;
+	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> mainCommandList;
 
 	DXGI_FORMAT renderOutputFormat = DXGI_FORMAT_R8G8B8A8_UNORM;
 	static const unsigned int frameCount = 2;		// Double buffering.
@@ -57,6 +57,9 @@ private:
 	DXDescriptorHeap depthStencilHeap = {};
 	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
 	DXResource depthStencilResource = {};
+
+	DXMeshSystem meshSystem;
+	DXTextureSystem textureSystem;
 
 private:
 	// Function to create directx device factory.
@@ -91,18 +94,16 @@ private:
 	void PREP_RENDER_COMPONENT()
 	{
 #ifdef _DEBUG
-		renderComponent.Initialize(this->device, this->commandList, this->renderOutputFormat, this->depthStencilFormat, this->GetMeshSystem());
+		renderComponent.Initialize(this->device, this->mainCommandList, this->renderOutputFormat, this->depthStencilFormat, this->GetMeshSystem(), this->GetTextureSystem());
 #endif // _DEBUG
 	}
 	void UPDATE_RENDER_COMPONENT()
 	{
 #ifdef _DEBUG
-		renderComponent.Update(this->commandList);
-		this->meshSystem.DrawMesh(renderComponent.GetMeshIndex(), this->commandList);
+		renderComponent.Update(this->mainCommandList);
+		this->meshSystem.DrawMesh(renderComponent.GetMeshIndex(), 1, this->mainCommandList);
 #endif // _DEBUG
 	}
-
-	DXMeshSystem meshSystem;
 
 public:
 	// Function to initialize DirectX.
@@ -126,5 +127,5 @@ public:
 	static Microsoft::WRL::ComPtr<ID3D12Device5> GetDirectXDevice();
 	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> GetMainCommandList();
 	DXMeshSystem* GetMeshSystem();
-
+	DXTextureSystem* GetTextureSystem();
 };

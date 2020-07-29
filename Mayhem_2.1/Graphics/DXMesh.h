@@ -10,7 +10,7 @@ public:
 		std::vector<DXVertex> vertices, std::vector<unsigned short> indices);
 
 	// Function to draw the mesh.
-	void DrawWithoutTexture(const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
+	void DrawWithoutTexture(unsigned int instances, const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
 
 private:
 	// Mesh data to be stored in vertices and indices.

@@ -2,7 +2,7 @@
 
 // Static variables.
 Microsoft::WRL::ComPtr<ID3D12Device5> DXRenderEngine::device = nullptr;
-Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> DXRenderEngine::commandList = nullptr;
+Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> DXRenderEngine::mainCommandList = nullptr;
 
 // DirectX Graphics class functions.
 void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int height)
@@ -98,7 +98,7 @@ void DXRenderEngine::CreateCommandQueue()
 
 	// Command queue creation.
 	D3D12_COMMAND_QUEUE_DESC queueDesc = {};
-	queueDesc.Type = this->commandListType;
+	queueDesc.Type = this->mainCommandListType;
 	queueDesc.Flags = D3D12_COMMAND_QUEUE_FLAG_NONE;
 	HR = this->device->CreateCommandQueue(&queueDesc, IID_PPV_ARGS(this->commandQueue.GetAddressOf()));
 	CheckError(HR, "Failed to create command queue.");
@@ -233,20 +233,20 @@ void DXRenderEngine::CreateDepthStencilBuffer(unsigned int width, unsigned int h
 	this->device->CreateDepthStencilView(this->depthStencilResource.Get(), &dsvDesc, this->depthStencilHeap.GetCPUHandle(0));
 
 	// Change the state of the depth/stencil resource.
-	this->depthStencilResource.TransitionTo(this->commandList, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
+	this->depthStencilResource.TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 }
 
 void DXRenderEngine::CreateCommandAllocator()
 {
-	HRESULT HR = this->device->CreateCommandAllocator(this->commandListType, IID_PPV_ARGS(this->commandAllocator.GetAddressOf()));
+	HRESULT HR = this->device->CreateCommandAllocator(this->mainCommandListType, IID_PPV_ARGS(this->commandAllocator.GetAddressOf()));
 	CheckError(HR, "Failed to create command allocator.");
 }
 
 void DXRenderEngine::CreateGraphicsCommandList()
 {
-	HRESULT HR = this->device->CreateCommandList(0, this->commandListType, this->commandAllocator.Get(), nullptr, IID_PPV_ARGS(commandList.GetAddressOf()));
+	HRESULT HR = this->device->CreateCommandList(0, this->mainCommandListType, this->commandAllocator.Get(), nullptr, IID_PPV_ARGS(mainCommandList.GetAddressOf()));
 	CheckError(HR, "Failed to create graphics command list.");
-	this->commandList->SetName(L"Main Command List");
+	this->mainCommandList->SetName(L"Main Command List");
 }
 
 void DXRenderEngine::CreateFenceNSynchronization()
@@ -294,11 +294,11 @@ void DXRenderEngine::FlushCommands()
 	HRESULT HR;
 
 	// Submit the commands to the queue to be executed in the GPU.
-	HR = this->commandList->Close();
+	HR = this->mainCommandList->Close();
 	CheckError(HR, "Failed to close the graphics command list.");
 
 	// Execute the graphics command lists.
-	ID3D12CommandList* ppCommandLists[] = { this->commandList.Get() };
+	ID3D12CommandList* ppCommandLists[] = { this->mainCommandList.Get() };
 	this->commandQueue->ExecuteCommandLists(_countof(ppCommandLists), ppCommandLists);
 
 	this->SignalFence();
@@ -330,18 +330,18 @@ void DXRenderEngine::RenderOnScreen()
 	HR = this->commandAllocator->Reset();
 	CheckError(HR, "Failed to reset command allocator.");
 
-	HR = this->commandList->Reset(this->commandAllocator.Get(), nullptr);
+	HR = this->mainCommandList->Reset(this->commandAllocator.Get(), nullptr);
 	CheckError(HR, "Failed to reset command list.");
 
 	// Set the viewport and scissor rect.
-	this->commandList->RSSetViewports(1, &this->viewport);
-	this->commandList->RSSetScissorRects(1, &this->scissorRect);
+	this->mainCommandList->RSSetViewports(1, &this->viewport);
+	this->mainCommandList->RSSetScissorRects(1, &this->scissorRect);
 
 	// Get the current frame back buffer to render on.
 	DXResource* currentRenderBuffer = &this->backBuffer[this->currentFrame];
 
 	// Transition the state of back buffer to render target if MSAA is dsabled.
-	if (!this->msaaEnable) currentRenderBuffer->TransitionTo(this->commandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	if (!this->msaaEnable) currentRenderBuffer->TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	//////////////////////// ALL RENDERING COMMANDS MUST TAKE PLACE FROM HERE ON ////////////////////////////
 	
@@ -352,13 +352,13 @@ void DXRenderEngine::RenderOnScreen()
 
 	// Clear the render buffer with a specific color/value.
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	this->commandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	this->mainCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
 	// Clear the depth/stencil buffer.
-	this->commandList->ClearDepthStencilView(this->depthStencilHeap.GetCPUHandle(0), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	this->mainCommandList->ClearDepthStencilView(this->depthStencilHeap.GetCPUHandle(0), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Output Merger.
-	this->commandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &this->depthStencilHeap.GetCPUHandle(0));
+	this->mainCommandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &this->depthStencilHeap.GetCPUHandle(0));
 
 	this->UPDATE_RENDER_COMPONENT();
 
@@ -366,8 +366,8 @@ void DXRenderEngine::RenderOnScreen()
 
 	// Transition the state of back buffer to render target if MSAA is dsabled.
 	// Otherwise transfer the content from MSAA buffer to current back buffer.
-	if (this->msaaEnable) TransferResourceContent(this->commandList, &this->msaaResource, currentRenderBuffer, this->renderOutputFormat);
-	else currentRenderBuffer->TransitionTo(this->commandList, D3D12_RESOURCE_STATE_PRESENT);
+	if (this->msaaEnable) TransferResourceContent(this->mainCommandList, &this->msaaResource, currentRenderBuffer, this->renderOutputFormat);
+	else currentRenderBuffer->TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_PRESENT);
 
 	this->FlushCommands();
 }
@@ -389,10 +389,15 @@ Microsoft::WRL::ComPtr<ID3D12Device5> DXRenderEngine::GetDirectXDevice()
 
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> DXRenderEngine::GetMainCommandList()
 {
-	return commandList;
+	return mainCommandList;
 }
 
 DXMeshSystem* DXRenderEngine::GetMeshSystem()
 {
 	return &this->meshSystem;
+}
+
+DXTextureSystem* DXRenderEngine::GetTextureSystem()
+{
+	return &this->textureSystem;
 }

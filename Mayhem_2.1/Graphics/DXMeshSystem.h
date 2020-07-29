@@ -31,8 +31,8 @@ private:
 	DXMesh ProcessMesh(const Microsoft::WRL::ComPtr<ID3D12Device5> device, const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, 
 		aiMesh* mesh, const aiScene* scene);
 public:
-	// Function to get the model in collection of models and load a model if it does not exist in collection.
+	// Function to get the model index in collection of models and load a model if it does not exist in collection.
 	unsigned int RegisterModel(const Microsoft::WRL::ComPtr<ID3D12Device5> device, const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, std::string fileDirectory);
 	// Function to draw the mesh from the collection.
-	void DrawMesh(unsigned int index, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
+	void DrawMesh(unsigned int index,unsigned int instances, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
 };

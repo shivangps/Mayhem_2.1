@@ -84,7 +84,7 @@ unsigned int DXMeshSystem::RegisterModel(const Microsoft::WRL::ComPtr<ID3D12Devi
 	// Check if the file with same name exists and return the index.
 	for (unsigned int i = 0; i < models.size(); i++)
 	{
-		if (std::strcmp(fileName.c_str(), models[i].fileName.c_str()))
+		if (std::strcmp(fileName.c_str(), models[i].fileName.c_str()) == 0)
 		{
 			return i;
 		}
@@ -100,9 +100,9 @@ unsigned int DXMeshSystem::RegisterModel(const Microsoft::WRL::ComPtr<ID3D12Devi
 	return modelIndex;
 }
 
-void DXMeshSystem::DrawMesh(unsigned int index, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)
+void DXMeshSystem::DrawMesh(unsigned int index, unsigned int instances, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)
 {
 	unsigned int meshSize = models[index].meshes.size();
 	for (unsigned int i = 0; i < meshSize; i++)
-		models[index].meshes[i].DrawWithoutTexture(commandList);
+		models[index].meshes[i].DrawWithoutTexture(instances, commandList);
 }
