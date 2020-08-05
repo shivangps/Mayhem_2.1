@@ -25,6 +25,18 @@
     <Filter Include="Header Files\Shader">
       <UniqueIdentifier>{665702d7-1431-4a90-a326-d43cc4757678}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders\Generic">
+      <UniqueIdentifier>{c1bd4bf8-24c9-43a9-a63f-57adffaee8ef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shader\Generic">
+      <UniqueIdentifier>{da1ec9f0-95ec-4278-9512-b53a62594b05}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shader\SimpleLight">
+      <UniqueIdentifier>{fc810e22-fbf9-4bdb-b174-c75a52d7c3cf}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Shaders\SimpleLight">
+      <UniqueIdentifier>{8260075c-e742-438b-952c-a4fa9f449e87}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -57,13 +69,22 @@
     <ClCompile Include="Graphics\DXShader.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Shaders\Generic\GenericShader.cpp">
-      <Filter>Source Files\Shaders</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\DXTexture.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\DXTextureSystem.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\Generic\GenericShader.cpp">
+      <Filter>Source Files\Shaders\Generic</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXQuadMesh.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Shaders\SimpleLight\SimpleLightShader.cpp">
+      <Filter>Source Files\Shaders\SimpleLight</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\RenderFramebuffer.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -107,9 +128,6 @@
     <ClInclude Include="Graphics\DXShader.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Generic\GenericShader.h">
-      <Filter>Header Files\Shader</Filter>
-    </ClInclude>
     <ClInclude Include="Shaders\ShaderCollectionHeader.h">
       <Filter>Header Files\Shader</Filter>
     </ClInclude>
@@ -119,13 +137,31 @@
     <ClInclude Include="Graphics\DXTextureSystem.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="Shaders\Generic\GenericShader.h">
+      <Filter>Header Files\Shader\Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\SimpleLight\SimpleLightShader.h">
+      <Filter>Header Files\Shader\SimpleLight</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXQuadMesh.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\RenderFramebuffer.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Generic\GenericPixelShader.hlsl">
-      <Filter>Source Files\Shaders</Filter>
+      <Filter>Source Files\Shaders\Generic</Filter>
     </FxCompile>
     <FxCompile Include="Shaders\Generic\GenericVertexShader.hlsl">
-      <Filter>Source Files\Shaders</Filter>
+      <Filter>Source Files\Shaders\Generic</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimpleLight\SimpleLightPixelShader.hlsl">
+      <Filter>Source Files\Shaders\SimpleLight</Filter>
+    </FxCompile>
+    <FxCompile Include="Shaders\SimpleLight\SimpleLightVertexShader.hlsl">
+      <Filter>Source Files\Shaders\SimpleLight</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

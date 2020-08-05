@@ -44,12 +44,12 @@ protected:
 	// Function to create texture buffer descriptor table.
 	void CreateTextureTable(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numOfTextures);
 	// Function to create graphics pipeline.
-	void CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5> device, DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat);
+	virtual void CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, unsigned int samples);
 
 public:
 	// Function to call for setting the DXShader for render.
 	void SetRenderDXShader(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
 	// Virtual functions to initialize the shader.
-	virtual void Initilaize(Microsoft::WRL::ComPtr<ID3D12Device5> device, DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat) {}
+	virtual void Initilaize(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, unsigned int samples) {}
 	virtual void Initialize(DXRenderEngine* renderEngine) {}
 };

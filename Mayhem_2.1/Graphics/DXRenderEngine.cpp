@@ -1,8 +1,24 @@
 #include "DXRenderEngine.h"
+#include <thread>
 
 // Static variables.
 Microsoft::WRL::ComPtr<ID3D12Device5> DXRenderEngine::device = nullptr;
 Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> DXRenderEngine::mainCommandList = nullptr;
+
+void DXRenderEngine::SETFRAMEBUFFERHEAP()
+{
+	this->framebufferheap.Initialize(this->device, 10, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
+	//unsigned int textureIndex = this->textureSystem.RegisterTexture(this->device, this->mainCommandList, "Textures/container2.png");
+	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(0));
+	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(1));
+	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(2));
+	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(3));
+	this->framebuffer.SetFragPosFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(0));
+	this->framebuffer.SetColorFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(1));
+	this->framebuffer.SetNormalFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(2));
+	this->framebuffer.SetSpecularFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(3));
+	this->framebuffer.SetDepthFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(4));
+}
 
 // DirectX Graphics class functions.
 void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int height)
@@ -29,14 +45,24 @@ void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int heig
 	this->CreateCommandQueue();
 	this->CreateSwapChain(width, height);
 	this->CreateRenderTargetView();
-	this->CreateMSAABuffer(width, height);
 	this->CreateCommandAllocator();
 	this->CreateGraphicsCommandList();
-	this->CreateDepthStencilBuffer(width, height);
 	this->CreateFenceNSynchronization();
 
 	// EXPERIMENTAL: TO BE DELETED
 	this->PREP_RENDER_COMPONENT();
+	// Multithreading tests.
+	std::vector<std::thread> t;
+	t.push_back(std::thread(&DXRenderEngine::CallByThread, this));
+	if (t[0].joinable())
+		t[0].join();
+
+	this->framebuffer.Initialize(this->device, width, height, (this->msaaEnable) ? this->maxMsaaVal : this->minMsaaVal);
+	this->ppShader = SimpleLight::Shader::GetInstance();
+	ppShader->Initilaize(this->device, 1, &this->renderOutputFormat, this->depthStencilFormat, 1);
+	this->quadMesh = DXQuadMesh::GetInstance();
+	this->quadMesh->Initialize(this->device);
+	this->SETFRAMEBUFFERHEAP();
 
 	// Flush all the commands after all initialization.
 	this->FlushCommands();
@@ -44,10 +70,8 @@ void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int heig
 
 void DXRenderEngine::SetNewResolution(unsigned int width, unsigned int height)
 {
-	this->CreateSwapChain(width, height);
+	this->swapChain->ResizeBuffers(0, 0, 0, DXGI_FORMAT_UNKNOWN, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
 	this->CreateRenderTargetView();
-	this->CreateMSAABuffer(width, height);
-	this->CreateDepthStencilBuffer(width, height);
 }
 
 void DXRenderEngine::CreateDeviceFactory()
@@ -148,92 +172,6 @@ void DXRenderEngine::CreateRenderTargetView()
 		this->backBuffer[i].SetName(L"Back Buffer " + i);
 	}
 
-
-}
-
-void DXRenderEngine::CreateMSAABuffer(unsigned int width, unsigned int height)
-{
-	// Creating heap for MSAA(Anti-Aliasing) RTV buffer.
-	this->msaaHeap.Initialize(this->device, 1, D3D12_DESCRIPTOR_HEAP_TYPE_RTV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
-
-	// Creating MSAA RTV resource.
-	D3D12_RESOURCE_DESC msaaResourceDesc = {};
-	ZeroMemory(&msaaResourceDesc, sizeof(msaaResourceDesc));
-	msaaResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	msaaResourceDesc.Alignment = 0;
-	msaaResourceDesc.SampleDesc.Count = 4;
-	msaaResourceDesc.SampleDesc.Quality = 0;
-	msaaResourceDesc.MipLevels = 1;
-	msaaResourceDesc.DepthOrArraySize = 1;
-	msaaResourceDesc.Width = width;
-	msaaResourceDesc.Height = height;
-	msaaResourceDesc.Format = this->renderOutputFormat;
-	msaaResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	msaaResourceDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET;
-
-	D3D12_CLEAR_VALUE msaaClearVal;
-	msaaClearVal.Color[0] = 0.0f;
-	msaaClearVal.Color[1] = 0.0f;
-	msaaClearVal.Color[2] = 0.0f;
-	msaaClearVal.Color[3] = 1.0f;
-	msaaClearVal.Format = this->renderOutputFormat;
-
-	this->msaaResource.InitializeAsDefault(this->device, &msaaResourceDesc, D3D12_RESOURCE_STATE_RENDER_TARGET, &msaaClearVal);
-
-	// Assign the resource view to the heap.
-	D3D12_RENDER_TARGET_VIEW_DESC msaaRTVDesc;
-	ZeroMemory(&msaaRTVDesc, sizeof(msaaRTVDesc));
-	msaaRTVDesc.Texture2D.MipSlice = 0;
-	msaaRTVDesc.Texture2D.PlaneSlice = 0;
-	msaaRTVDesc.ViewDimension = D3D12_RTV_DIMENSION_TEXTURE2DMS;
-	msaaRTVDesc.Format = this->renderOutputFormat;
-
-	this->device->CreateRenderTargetView(this->msaaResource.Get(), &msaaRTVDesc, this->msaaHeap.GetCPUHandle(0));
-}
-
-void DXRenderEngine::CreateDepthStencilBuffer(unsigned int width, unsigned int height)
-{
-	// Create the depth/stencil view heap.
-	this->depthStencilHeap.Initialize(this->device, 1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
-
-	// Describe the clearing of depth/stencil buffer.
-	D3D12_CLEAR_VALUE depthOptimizedClearValue = {};
-	depthOptimizedClearValue.Format = this->depthStencilFormat;
-	depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
-	depthOptimizedClearValue.DepthStencil.Stencil = 0;
-
-	// Describe the depth/stencil resource view.
-	D3D12_RESOURCE_DESC depthStencilDesc;
-	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-	depthStencilDesc.Alignment = 0;
-	depthStencilDesc.Width = width;
-	depthStencilDesc.Height = height;
-	depthStencilDesc.DepthOrArraySize = 1;
-	depthStencilDesc.MipLevels = 1;
-
-	depthStencilDesc.Format = this->depthStencilFormat;
-
-	depthStencilDesc.SampleDesc.Count = (this->msaaEnable) ? 4 : 1;
-	depthStencilDesc.SampleDesc.Quality = 0;
-	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
-	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
-
-	// Create depth/stencil resource.
-	this->depthStencilResource.InitializeAsDefault(this->device, &depthStencilDesc, D3D12_RESOURCE_STATE_COMMON, &depthOptimizedClearValue);
-	this->depthStencilResource.SetName(L"Depth/Stencil Buffer");
-
-	// Describing the depth/stencil view.
-	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
-	dsvDesc.Format = this->depthStencilFormat;
-	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
-	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
-	dsvDesc.Texture2D.MipSlice = 0;
-
-	// Creating depth/stencil view in heap.
-	this->device->CreateDepthStencilView(this->depthStencilResource.Get(), &dsvDesc, this->depthStencilHeap.GetCPUHandle(0));
-
-	// Change the state of the depth/stencil resource.
-	this->depthStencilResource.TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_COMMON, D3D12_RESOURCE_STATE_DEPTH_WRITE);
 }
 
 void DXRenderEngine::CreateCommandAllocator()
@@ -341,33 +279,45 @@ void DXRenderEngine::RenderOnScreen()
 	DXResource* currentRenderBuffer = &this->backBuffer[this->currentFrame];
 
 	// Transition the state of back buffer to render target if MSAA is dsabled.
-	if (!this->msaaEnable) currentRenderBuffer->TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
+	currentRenderBuffer->TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_RENDER_TARGET);
 
 	//////////////////////// ALL RENDERING COMMANDS MUST TAKE PLACE FROM HERE ON ////////////////////////////
 	
 	// Get render target CPU handle appropriately based on MSAA being enabled.
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = {};
-	if (!this->msaaEnable) rtvHandle = this->rtvDescriptorHeap.GetCPUHandle(this->currentFrame);
-	else rtvHandle = this->msaaHeap.GetCPUHandle(0);
+	rtvHandle = this->rtvDescriptorHeap.GetCPUHandle(this->currentFrame);
 
 	// Clear the render buffer with a specific color/value.
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	this->mainCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
 
-	// Clear the depth/stencil buffer.
-	this->mainCommandList->ClearDepthStencilView(this->depthStencilHeap.GetCPUHandle(0), D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
-
-	// Output Merger.
-	this->mainCommandList->OMSetRenderTargets(1, &rtvHandle, TRUE, &this->depthStencilHeap.GetCPUHandle(0));
+	// Setting up the framebuffer.
+	this->framebuffer.SetFramebuffer(this->mainCommandList);
 
 	this->UPDATE_RENDER_COMPONENT();
+
+	// Removing the framebuffer.
+	this->framebuffer.RemoveFramebuffer(this->mainCommandList, 1, &rtvHandle, nullptr);
+
+	// Setup the post processing shader.
+	this->ppShader->SetRenderDXShader(this->mainCommandList);
+
+	ID3D12DescriptorHeap* ppHeaps[] = { this->framebufferheap.Get() };
+	this->mainCommandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::FragPosTex, this->framebufferheap.GetGPUHandle(0));
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::ColorTex, this->framebufferheap.GetGPUHandle(1));
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::NormalTex, this->framebufferheap.GetGPUHandle(2));
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::SpecGlossTex, this->framebufferheap.GetGPUHandle(3));
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::DepthTex, this->framebufferheap.GetGPUHandle(4));
+
+	this->quadMesh->DrawQuad(this->mainCommandList);
 
 	///////////////////////////////// RENDERING COMMANDS ENDS HERE //////////////////////////////////////////
 
 	// Transition the state of back buffer to render target if MSAA is dsabled.
 	// Otherwise transfer the content from MSAA buffer to current back buffer.
-	if (this->msaaEnable) TransferResourceContent(this->mainCommandList, &this->msaaResource, currentRenderBuffer, this->renderOutputFormat);
-	else currentRenderBuffer->TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_PRESENT);
+	currentRenderBuffer->TransitionTo(this->mainCommandList, D3D12_RESOURCE_STATE_PRESENT);
 
 	this->FlushCommands();
 }

@@ -1,12 +1,13 @@
 #include "ADXRenderComponent.h"
 
 void ADXRenderComponent::Initialize(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList,
-	DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem, DXTextureSystem* textureSystem)
+	unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem, DXTextureSystem* textureSystem,
+	 unsigned int samples)
 {
 	this->application = Win32Application::GetInstance();
 
 	this->shader = GenericShader::Shader::GetInstance();
-	this->shader->Initilaize(device, renderTargetFormat, depthStencilFormat);
+	this->shader->Initilaize(device, numRT, renderTargetFormats, depthStencilFormat, samples);
 
 	this->InitializeBuffers(device, commandList, textureSystem);
 	this->SetMeshIndex(meshSysytem->RegisterModel(device, commandList, "3DObjects/metaCube.obj"));
@@ -33,7 +34,7 @@ void ADXRenderComponent::InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5>
 
 	// Create shader resource view for texture buffer.
 	{
-		this->texture = textureSystem->RegisterTexture(device, commandList, "Textures/White.jpg");
+		this->texture = textureSystem->RegisterTexture(device, commandList, "Textures/container2.png");
 		textureSystem->CreateResourceView(this->texture, device, this->cbv_srv_heap.GetCPUHandle(GenericShader::Texture));
 	}
 	return;
@@ -57,7 +58,7 @@ void ADXRenderComponent::UpdateState()
 	model = DirectX::XMMatrixRotationY(time->GetCurrentStartTime() / 1000.0f) * model;
 
 	// VIEW
-	DirectX::XMVECTOR cameraPosition = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 1.0f);
+	DirectX::XMVECTOR cameraPosition = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
 	DirectX::XMVECTOR targetLookPos = DirectX::XMVectorZero();
 	DirectX::XMVECTOR upPosition = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
 	view = DirectX::XMMatrixLookAtLH(cameraPosition, targetLookPos, upPosition);
@@ -74,7 +75,7 @@ void ADXRenderComponent::UpdateState()
 	memcpy(this->p_mat_cbv_begin, &this->matrix_data, sizeof(this->matrix_data));
 }
 
-void ADXRenderComponent::Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList)
+void ADXRenderComponent::Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXMeshSystem* meshSystem)
 {
 	this->UpdateState();
 
@@ -87,6 +88,7 @@ void ADXRenderComponent::Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList
 	commandList->SetGraphicsRootDescriptorTable(GenericShader::Matrix, this->cbv_srv_heap.GetGPUHandle(GenericShader::Matrix));
 	commandList->SetGraphicsRootDescriptorTable(GenericShader::Texture, this->cbv_srv_heap.GetGPUHandle(GenericShader::Texture));
 
+	meshSystem->DrawMesh(this->meshIndex, 1, commandList);
 }
 
 unsigned int ADXRenderComponent::GetMeshIndex()

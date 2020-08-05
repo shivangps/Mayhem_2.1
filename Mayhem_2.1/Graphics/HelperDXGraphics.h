@@ -95,6 +95,24 @@ public:
 	static D3D12_INPUT_ELEMENT_DESC* GetVertexLayout();
 };
 
+// Struct to store the quad vertices for post processing.
+struct DXQuadVertex
+{
+public:
+	DXQuadVertex(DirectX::XMFLOAT3 position, DirectX::XMFLOAT2 texCoord) : position(position), texCoord(texCoord) {}
+	DXQuadVertex(float x, float y, float z, float u, float v) : position(x, y, z), texCoord(u, v) {}
+
+	DirectX::XMFLOAT3 position;
+	DirectX::XMFLOAT2 texCoord;
+
+public:
+	// Vertex layout.
+	static D3D12_INPUT_ELEMENT_DESC inputEleDesc[2];
+	static unsigned int elements;
+
+	static D3D12_INPUT_ELEMENT_DESC* GetVertexLayout();
+};
+
 // Function to transfer the content of the resource from one to another.
 void TransferResourceContent(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXResource* fromResource, DXResource* toResource, DXGI_FORMAT format);
 

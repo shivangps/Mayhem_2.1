@@ -84,7 +84,7 @@ void DXShader::CreateTextureTable(Microsoft::WRL::ComPtr<ID3D12Device5> device, 
 	}
 }
 
-void DXShader::CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5> device, DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat)
+void DXShader::CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, unsigned int samples)
 {
 	HRESULT HR;
 
@@ -103,9 +103,12 @@ void DXShader::CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5>
 	pipelineDesc.DepthStencilState = CD3DX12_DEPTH_STENCIL_DESC(D3D12_DEFAULT);
 	pipelineDesc.SampleMask = UINT_MAX;
 	pipelineDesc.PrimitiveTopologyType = D3D12_PRIMITIVE_TOPOLOGY_TYPE_TRIANGLE;
-	pipelineDesc.NumRenderTargets = 1;
-	pipelineDesc.RTVFormats[0] = renderTargetFormat;
-	pipelineDesc.SampleDesc.Count = 4;
+	pipelineDesc.NumRenderTargets = numRT;
+	for(unsigned int i = 0; i < numRT; i++)
+	{
+		pipelineDesc.RTVFormats[i] = renderTargetFormats[i];
+	}
+	pipelineDesc.SampleDesc.Count = samples;
 	pipelineDesc.SampleDesc.Quality = 0;
 	pipelineDesc.DSVFormat = depthStencilFormat;
 

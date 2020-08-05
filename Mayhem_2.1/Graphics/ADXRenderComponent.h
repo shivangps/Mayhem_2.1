@@ -42,13 +42,13 @@ private:
 public:
 	// Function to be called for initialization.
 	void Initialize(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList,
-		DXGI_FORMAT renderTargetFormat, DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem, DXTextureSystem* textureSystem);
+		unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSysytem, DXTextureSystem* textureSystem, unsigned int samples);
 	// Function to initialize texture and constant buffers.
 	void InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXTextureSystem* textureSystem);
 	// Function to update constant buffers.
 	void UpdateState();
 	// Function to be called for updated drawing.
-	void Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
+	void Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXMeshSystem* meshSystem);
 
 private:
 	// Stores which mesh from collection.

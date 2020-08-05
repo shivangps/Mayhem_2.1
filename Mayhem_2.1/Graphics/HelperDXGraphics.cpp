@@ -200,3 +200,14 @@ D3D12_INPUT_ELEMENT_DESC* DXVertex::GetVertexLayout()
 
 	return inputEleDesc;
 }
+
+D3D12_INPUT_ELEMENT_DESC DXQuadVertex::inputEleDesc[2];
+unsigned int DXQuadVertex::elements = 2;
+
+D3D12_INPUT_ELEMENT_DESC* DXQuadVertex::GetVertexLayout()
+{
+	inputEleDesc[0] = { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+	inputEleDesc[1] = { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, D3D12_APPEND_ALIGNED_ELEMENT, D3D12_INPUT_CLASSIFICATION_PER_VERTEX_DATA, 0 };
+
+	return inputEleDesc;
+}

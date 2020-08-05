@@ -1,17 +1,22 @@
 #pragma once
 #include "../Graphics/DXShader.h"
 
-namespace GenericShader
+// A post processing shader that applies lighting to objects on G-buffer.
+
+namespace SimpleLight
 {
 	typedef
 		enum Slot
 	{
-		Saturation,
-		Matrix,
-		Texture
-	} Slot;
+		FragPosTex,
+		ColorTex,
+		NormalTex,
+		SpecGlossTex,
+		DepthTex,
+		Size
+	}Slot;
 
-	// It is a singleton class to generic shader.
+	// It is a singleton class to simple light shader.
 	class Shader : public DXShader
 	{
 		Shader() {}
@@ -26,5 +31,7 @@ namespace GenericShader
 
 		// Override of virtual function to initialize.
 		void Initilaize(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, unsigned int samples);
+		// Function to create graphics pipeline.
+		void CreateGraphicsPipelineState(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, unsigned int samples);
 	};
 }

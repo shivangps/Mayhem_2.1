@@ -1,6 +1,9 @@
 #pragma once
 
 #include "ADXRenderComponent.h"
+#include "RenderFramebuffer.h"
+#include "../Shaders/SimpleLight/SimpleLightShader.h"
+#include "DXQuadMesh.h"
 
 // This header contains a class that is responsible for rendering all the game objects using DirectX 12 API.
 
@@ -43,9 +46,9 @@ private:
 	DXDescriptorHeap rtvDescriptorHeap = {};
 	DXResource backBuffer[frameCount];
 
-	bool msaaEnable = true;
-	DXDescriptorHeap msaaHeap = {};
-	DXResource msaaResource = {};
+	bool msaaEnable = false;
+	unsigned int maxMsaaVal = 8;
+	unsigned int minMsaaVal = 2;
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
 	unsigned long long fenceValue = 0;
@@ -54,9 +57,7 @@ private:
 	D3D12_VIEWPORT viewport = {};
 	D3D12_RECT scissorRect = {};
 
-	DXDescriptorHeap depthStencilHeap = {};
 	DXGI_FORMAT depthStencilFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	DXResource depthStencilResource = {};
 
 	DXMeshSystem meshSystem;
 	DXTextureSystem textureSystem;
@@ -74,10 +75,6 @@ private:
 	void CreateSwapChain(unsigned int width, unsigned int height);
 	// Function to create the render target view for the swap chain.
 	void CreateRenderTargetView();
-	// Function to create MSAA(Anti-Aliasing) render target buffer.
-	void CreateMSAABuffer(unsigned int width, unsigned int height);
-	// Function to create Depth/Stencil buffer.
-	void CreateDepthStencilBuffer(unsigned int width, unsigned int height);
 	// Function to create command allocator.
 	void CreateCommandAllocator();
 	// Function to create command list.
@@ -94,16 +91,27 @@ private:
 	void PREP_RENDER_COMPONENT()
 	{
 #ifdef _DEBUG
-		renderComponent.Initialize(this->device, this->mainCommandList, this->renderOutputFormat, this->depthStencilFormat, this->GetMeshSystem(), this->GetTextureSystem());
+		renderComponent.Initialize(this->device, this->mainCommandList, this->framebuffer.NumberOfRT(), this->framebuffer.GetRTFormats(), this->depthStencilFormat, this->GetMeshSystem(), this->GetTextureSystem(), (this->msaaEnable)? this->maxMsaaVal : this->minMsaaVal);
 #endif // _DEBUG
 	}
 	void UPDATE_RENDER_COMPONENT()
 	{
 #ifdef _DEBUG
-		renderComponent.Update(this->mainCommandList);
-		this->meshSystem.DrawMesh(renderComponent.GetMeshIndex(), 1, this->mainCommandList);
+		renderComponent.Update(this->mainCommandList, this->GetMeshSystem());
 #endif // _DEBUG
 	}
+	void CallByThread() 
+	{
+		OutputDebugStringA("Called by thread.\n");
+	}
+	RenderFramebuffer framebuffer;
+	// Post - process shader.
+	DXShader* ppShader = nullptr;
+	DXQuadMesh* quadMesh = nullptr;
+	DXDescriptorHeap framebufferheap = {};
+	void SETFRAMEBUFFERHEAP();
+
+	// XX------------ EXPERIMENTAL ENDS HERE --------------XX
 
 public:
 	// Function to initialize DirectX.
