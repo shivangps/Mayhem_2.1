@@ -180,6 +180,7 @@
     <ClInclude Include="Helper.h" />
     <ClInclude Include="Graphics\HelperDXGraphics.h" />
     <ClInclude Include="Graphics\ADXRenderComponent.h" />
+    <ClInclude Include="MathEngine.h" />
     <ClInclude Include="Shaders\ShaderCollectionHeader.h" />
     <ClInclude Include="Shaders\Generic\GenericShader.h" />
     <ClInclude Include="Shaders\SimpleLight\SimpleLightShader.h" />

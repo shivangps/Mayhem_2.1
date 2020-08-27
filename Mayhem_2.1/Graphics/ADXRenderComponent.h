@@ -3,6 +3,7 @@
 #include "DXTextureSystem.h"
 #include "../Shaders/ShaderCollectionHeader.h"
 #include "DXTexture.h"
+#include "../MathEngine.h"
 
 struct SatCBuffer
 {
@@ -11,9 +12,9 @@ struct SatCBuffer
 
 struct MatCBuffer
 {
-	DirectX::XMFLOAT4X4 TransformationMatrix;
-	DirectX::XMFLOAT4X4 ModelMatrix;
-	DirectX::XMFLOAT4X4 InvTrpModelMatrix;
+	Matrix4 TransformationMatrix;
+	Matrix4 ModelMatrix;
+	Matrix4 InvTrpModelMatrix;
 };
 
 class ADXRenderComponent
@@ -53,6 +54,8 @@ public:
 private:
 	// Stores which mesh from collection.
 	unsigned int meshIndex = 0;
+	// Vector position.
+	Vector3 position = Vector3(0.0f);
 
 public:
 	// Get/Set function for mesh index.

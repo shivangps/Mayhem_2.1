@@ -149,6 +149,9 @@
     <ClInclude Include="Graphics\RenderFramebuffer.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
+    <ClInclude Include="MathEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Shaders\Generic\GenericPixelShader.hlsl">

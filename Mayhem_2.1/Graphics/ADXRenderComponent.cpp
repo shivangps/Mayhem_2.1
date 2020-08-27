@@ -49,29 +49,31 @@ void ADXRenderComponent::UpdateState()
 	memcpy(this->p_sat_cbv_begin, &saturation_data, sizeof(saturation_data));
 
 	// Matrix constant buffer.
-	DirectX::XMMATRIX model, view, projection;
+	Matrix4 model, view, projection;
+
+	position = Vector3(1.0f, 0.0f, 0.0f);
 
 	// MODEL
-	model = DirectX::XMMatrixIdentity();
-	//model = DirectX::XMMatrixRotationZ(time->GetCurrentStartTime() / 1000.0f) * model;
-	model = DirectX::XMMatrixRotationX(time->GetCurrentStartTime() / 1000.0f) * model;
-	model = DirectX::XMMatrixRotationY(time->GetCurrentStartTime() / 1000.0f) * model;
+	model = model.Translation(position);
+	model = model.Scale(Vector3(0.5f));
+	model = DirectX::XMMatrixRotationX(time->GetCurrentStartTime() / 1000.0f) * model.GetMatrix();
+	model = DirectX::XMMatrixRotationY(time->GetCurrentStartTime() / 1000.0f) * model.GetMatrix();
 
 	// VIEW
-	DirectX::XMVECTOR cameraPosition = DirectX::XMVectorSet(0.0f, 0.0f, -5.0f, 0.0f);
-	DirectX::XMVECTOR targetLookPos = DirectX::XMVectorZero();
-	DirectX::XMVECTOR upPosition = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-	view = DirectX::XMMatrixLookAtLH(cameraPosition, targetLookPos, upPosition);
+	Vector3 cameraPosition(0.0f, 0.0f, -5.0f);
+	Vector3 targetLookPos;
+	Vector3 upPosition(0.0f, 1.0f, 0.0f);
+	view = DirectX::XMMatrixLookAtLH(cameraPosition.GetVector(), targetLookPos.GetVector(), upPosition.GetVector());
 
 	// PROJECTION
 	projection = DirectX::XMMatrixPerspectiveFovLH(45.0f, (float)this->application->GetWidth() / (float)this->application->GetHeight(), 0.1f, 100.0f);
 
 	// MVP
-	DirectX::XMMATRIX MVPmatrix = model * view * projection;
+	Matrix4 mvpMatrix = model * view * projection;
 
-	DirectX::XMStoreFloat4x4(&this->matrix_data.TransformationMatrix, DirectX::XMMatrixTranspose(MVPmatrix));
-	DirectX::XMStoreFloat4x4(&this->matrix_data.ModelMatrix, DirectX::XMMatrixTranspose(model));
-	DirectX::XMStoreFloat4x4(&this->matrix_data.InvTrpModelMatrix, DirectX::XMMatrixInverse(&DirectX::XMMatrixDeterminant(model), model));
+	this->matrix_data.TransformationMatrix = mvpMatrix.Transpose();
+	this->matrix_data.ModelMatrix = model;
+	this->matrix_data.InvTrpModelMatrix = model.Inverse(model.Determinant());
 	memcpy(this->p_mat_cbv_begin, &this->matrix_data, sizeof(this->matrix_data));
 }
 
