@@ -75,9 +75,6 @@
     <ClCompile Include="Graphics\DXTextureSystem.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Shaders\Generic\GenericShader.cpp">
-      <Filter>Source Files\Shaders\Generic</Filter>
-    </ClCompile>
     <ClCompile Include="Graphics\DXQuadMesh.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>

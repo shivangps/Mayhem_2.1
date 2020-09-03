@@ -46,7 +46,10 @@ private:
 	DXDescriptorHeap rtvDescriptorHeap = {};
 	DXResource backBuffer[frameCount];
 
-	bool msaaEnable = false;
+	DXDescriptorHeap dsvDescriptorHeap = {};
+	DXResource depthStencilResource = {};
+
+	bool msaaEnable = true;
 	unsigned int maxMsaaVal = 8;
 	unsigned int minMsaaVal = 2;
 
@@ -75,6 +78,8 @@ private:
 	void CreateSwapChain(unsigned int width, unsigned int height);
 	// Function to create the render target view for the swap chain.
 	void CreateRenderTargetView();
+	// Function to create the depth stencil view.
+	void CreateDepthStencilView(unsigned int width, unsigned int height);
 	// Function to create command allocator.
 	void CreateCommandAllocator();
 	// Function to create command list.

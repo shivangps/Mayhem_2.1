@@ -24,12 +24,8 @@ SamplerState mainSampler : register(s0);
 
 void main(in ps_in IN, out ps_out OUT)
 {
-    float3 lightPos = float3(0.0f, 2.0f, -2.0f);
     float3 normal = normalize(IN.normal);
     float3 coreColor = mainTexture.Sample(mainSampler, IN.texCoord).rgb;
-    
-    float3 lightDirection = normalize(lightPos - IN.fragPosition);
-    float diffuseFactor = max(dot(normal, lightDirection), saturation);
     
     OUT.fragPos = IN.fragPosition;
     OUT.normal = float4(normal, 1.0f);

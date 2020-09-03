@@ -159,7 +159,6 @@
     <ClCompile Include="Graphics\RenderFramebuffer.cpp" />
     <ClCompile Include="Graphics\HelperDXGraphics.cpp" />
     <ClCompile Include="Main.cpp" />
-    <ClCompile Include="Shaders\Generic\GenericShader.cpp" />
     <ClCompile Include="Shaders\SimpleLight\SimpleLightShader.cpp" />
     <ClCompile Include="Time.cpp" />
     <ClCompile Include="Win32Application.cpp" />

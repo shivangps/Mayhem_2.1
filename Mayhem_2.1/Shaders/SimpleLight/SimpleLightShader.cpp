@@ -1,5 +1,7 @@
 #include "SimpleLightShader.h"
 
+// Header to initialize a simple lighting shader.
+
 namespace SimpleLight
 {
 	void Shader::Initilaize(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, unsigned int samples)

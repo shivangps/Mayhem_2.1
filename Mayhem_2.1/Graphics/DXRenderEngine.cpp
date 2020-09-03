@@ -45,6 +45,7 @@ void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int heig
 	this->CreateCommandQueue();
 	this->CreateSwapChain(width, height);
 	this->CreateRenderTargetView();
+	this->CreateDepthStencilView(width, height);
 	this->CreateCommandAllocator();
 	this->CreateGraphicsCommandList();
 	this->CreateFenceNSynchronization();
@@ -174,6 +175,49 @@ void DXRenderEngine::CreateRenderTargetView()
 
 }
 
+void DXRenderEngine::CreateDepthStencilView(unsigned int width, unsigned int height)
+{
+	HRESULT HR;
+
+	// Create depth stencil view descriptor heap.
+	dsvDescriptorHeap.Initialize(this->device, 1, D3D12_DESCRIPTOR_HEAP_TYPE_DSV, D3D12_DESCRIPTOR_HEAP_FLAG_NONE);
+
+	// Create depth stencil buffer for Z - buffer.
+
+	// Description for clearing depth stencil view.
+	D3D12_CLEAR_VALUE depthOptimizedClearValue;
+	depthOptimizedClearValue.Format = this->depthStencilFormat;
+	depthOptimizedClearValue.DepthStencil.Depth = 1.0f;
+	depthOptimizedClearValue.DepthStencil.Stencil = 0;
+
+	// Describe the depth stencil buffer.
+	D3D12_RESOURCE_DESC depthStencilDesc = {};
+	depthStencilDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+	depthStencilDesc.Alignment = 0;
+	depthStencilDesc.Width = width;
+	depthStencilDesc.Height = height;
+	depthStencilDesc.DepthOrArraySize = 1;
+	depthStencilDesc.MipLevels = 1;
+	depthStencilDesc.Format = this->depthStencilFormat;
+	depthStencilDesc.SampleDesc.Count = 1;
+	depthStencilDesc.SampleDesc.Quality = 0;
+	depthStencilDesc.Layout = D3D12_TEXTURE_LAYOUT_UNKNOWN;
+	depthStencilDesc.Flags = D3D12_RESOURCE_FLAG_ALLOW_DEPTH_STENCIL;
+
+	// Create resource.
+	this->depthStencilResource.InitializeAsDefault(this->device, &depthStencilDesc, D3D12_RESOURCE_STATE_DEPTH_WRITE, &depthOptimizedClearValue);
+
+	// Create depth stencil view.
+	D3D12_DEPTH_STENCIL_VIEW_DESC dsvDesc = {};
+	dsvDesc.Format = this->depthStencilFormat;
+	dsvDesc.ViewDimension = D3D12_DSV_DIMENSION_TEXTURE2DMS;
+	dsvDesc.Flags = D3D12_DSV_FLAG_NONE;
+	dsvDesc.Texture2D.MipSlice = 0;
+
+	// Create depth stencil view.
+	this->device->CreateDepthStencilView(this->depthStencilResource.Get(), &dsvDesc, this->dsvDescriptorHeap.GetCPUHandle(0));
+}
+
 void DXRenderEngine::CreateCommandAllocator()
 {
 	HRESULT HR = this->device->CreateCommandAllocator(this->mainCommandListType, IID_PPV_ARGS(this->commandAllocator.GetAddressOf()));
@@ -286,10 +330,15 @@ void DXRenderEngine::RenderOnScreen()
 	// Get render target CPU handle appropriately based on MSAA being enabled.
 	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = {};
 	rtvHandle = this->rtvDescriptorHeap.GetCPUHandle(this->currentFrame);
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = {};
+	dsvHandle = this->dsvDescriptorHeap.GetCPUHandle(0);
 
 	// Clear the render buffer with a specific color/value.
 	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
 	this->mainCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+
+	// Clear depth stencil buffer.
+	this->mainCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
 
 	// Setting up the framebuffer.
 	this->framebuffer.SetFramebuffer(this->mainCommandList);
@@ -297,7 +346,7 @@ void DXRenderEngine::RenderOnScreen()
 	this->UPDATE_RENDER_COMPONENT();
 
 	// Removing the framebuffer.
-	this->framebuffer.RemoveFramebuffer(this->mainCommandList, 1, &rtvHandle, nullptr);
+	this->framebuffer.RemoveFramebuffer(this->mainCommandList, 1, &rtvHandle, &dsvHandle);
 
 	// Setup the post processing shader.
 	this->ppShader->SetRenderDXShader(this->mainCommandList);
