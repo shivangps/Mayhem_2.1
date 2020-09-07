@@ -201,16 +201,19 @@ private:
 
 	void CalculateNewLocalAxes()
 	{
-		Matrix4 rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(rotation.X(), rotation.Y(), 0.0f);
+		Matrix4 rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(rotation.X()), DirectX::XMConvertToRadians(rotation.Y()), DirectX::XMConvertToRadians(rotation.Z()));
 		this->local_right = DirectX::XMVector3TransformCoord(global_right, rotationMatrix.GetMatrix());
-		this->local_up = DirectX::XMVector2TransformCoord(global_up, rotationMatrix.GetMatrix());
-		this->local_forward = DirectX::XMVector2TransformCoord(global_forward, rotationMatrix.GetMatrix());
+		this->local_up = DirectX::XMVector3TransformCoord(global_up, rotationMatrix.GetMatrix());
+		this->local_forward = DirectX::XMVector3TransformCoord(global_forward, rotationMatrix.GetMatrix());
 	}
 
 public:
 	Transform()
 	{
 		this->scale = Vector3(1.0f);
+		this->local_right = global_right;
+		this->local_up = global_up;
+		this->local_forward = global_forward;
 	}
 
 	// Get and Set functions.
@@ -352,5 +355,40 @@ public:
 		model = model.Scale(this->scale);
 		model = model.Rotation(this->rotation);
 		return model;
+	}
+};
+
+// Structure to store viewport rect.
+struct Viewport
+{
+	D3D12_VIEWPORT values = {};
+
+	Viewport() 
+	{
+		this->values.MinDepth = 0.0f;
+		this->values.MaxDepth = 1.0f;
+		this->values.Width = 0;
+		this->values.Height = 0;
+		this->values.TopLeftX = 0.0f;
+		this->values.TopLeftY = 0.0f;
+	}
+	void operator=(D3D12_VIEWPORT newViewport)
+	{
+		this->values = newViewport;
+	}
+};
+
+// Structure to store rects.
+struct Rect
+{
+	D3D12_RECT values = {};
+
+	Rect()
+	{
+		this->values = { 0, 0, 0, 0 };
+	}
+	void operator=(D3D12_RECT newRect)
+	{
+		this->values = newRect;
 	}
 };

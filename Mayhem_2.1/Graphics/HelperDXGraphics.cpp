@@ -4,6 +4,7 @@
 void DXResource::InitializeAsDefault(Microsoft::WRL::ComPtr<ID3D12Device5> device, D3D12_RESOURCE_DESC* description, D3D12_RESOURCE_STATES setState, D3D12_CLEAR_VALUE* clearValue)
 {
 	this->currentState = setState;
+	this->msaaSamples = description->SampleDesc.Count;
 
 	HRESULT HR;
 
@@ -20,6 +21,7 @@ void DXResource::InitializeAsDefault(Microsoft::WRL::ComPtr<ID3D12Device5> devic
 void DXResource::InitializeAsUpload(Microsoft::WRL::ComPtr<ID3D12Device5> device, D3D12_RESOURCE_DESC* description, D3D12_RESOURCE_STATES setState, D3D12_CLEAR_VALUE* clearValue)
 {
 	this->currentState = setState;
+	this->msaaSamples = description->SampleDesc.Count;
 
 	HRESULT HR;
 
@@ -37,6 +39,7 @@ void DXResource::InitializeFromResource(Microsoft::WRL::ComPtr<ID3D12Resource> n
 {
 	this->resource = newResource;
 	this->currentState = initState;
+	this->msaaSamples = newResource->GetDesc().SampleDesc.Count;
 }
 
 void DXResource::TransitionTo(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, D3D12_RESOURCE_STATES newState)
@@ -74,6 +77,11 @@ D3D12_RESOURCE_STATES DXResource::GetState()
 D3D12_GPU_VIRTUAL_ADDRESS DXResource::GetGPUVirtualAddress()
 {
 	return this->resource->GetGPUVirtualAddress();
+}
+
+unsigned int DXResource::GetMsaaSamples()
+{
+	return this->msaaSamples;
 }
 
 void DXResource::Map(unsigned int Subresource, D3D12_RANGE* pReadRange, void** ppData)
@@ -157,8 +165,16 @@ void TransferResourceContent(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> 
 	fromResource->TransitionTo(commandList, D3D12_RESOURCE_STATE_RESOLVE_SOURCE);
 	toResource->TransitionTo(commandList, D3D12_RESOURCE_STATE_RESOLVE_DEST);
 
-	// Transfer the content.
-	commandList->ResolveSubresource(toResource->Get(), 0, fromResource->Get(), 0, format);
+	unsigned int samples = fromResource->GetMsaaSamples();
+	// Transfer the content based on the sample of the source resource.
+	if (samples > 1)
+	{
+		commandList->ResolveSubresource(toResource->Get(), 0, fromResource->Get(), 0, format);
+	}
+	else
+	{
+		commandList->CopyResource(toResource->Get(), fromResource->Get());
+	}
 
 	// Transition the resources back to its initial state.
 	fromResource->TransitionTo(commandList, previousFromState);

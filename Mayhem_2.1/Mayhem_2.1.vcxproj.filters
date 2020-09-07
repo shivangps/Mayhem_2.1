@@ -13,12 +13,6 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
-    <Filter Include="Header Files\Graphics">
-      <UniqueIdentifier>{093f8aa8-1e28-490c-92d5-d5489540661b}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Files\Graphics">
-      <UniqueIdentifier>{8afa8f40-a434-4842-aa95-0c234e5f40c7}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Source Files\Shaders">
       <UniqueIdentifier>{3957ba21-143b-4980-97bc-554b782b83d2}</UniqueIdentifier>
     </Filter>
@@ -37,6 +31,12 @@
     <Filter Include="Source Files\Shaders\SimpleLight">
       <UniqueIdentifier>{8260075c-e742-438b-952c-a4fa9f449e87}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\Graphics">
+      <UniqueIdentifier>{a0e8e011-ff17-4c40-8d89-26646de73d44}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Graphics">
+      <UniqueIdentifier>{907e9a3b-dead-405e-9992-17799b4db23c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -48,22 +48,34 @@
     <ClCompile Include="GameEngine.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\DXRenderEngine.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\HelperDXGraphics.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
     <ClCompile Include="Time.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Shaders\SimpleLight\SimpleLightShader.cpp">
+      <Filter>Source Files\Shaders\SimpleLight</Filter>
+    </ClCompile>
     <ClCompile Include="Graphics\ADXRenderComponent.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\Camera.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXDeferedRenderer.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXFramebuffer.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\DXMesh.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\DXMeshSystem.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXQuadMesh.cpp">
+      <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXRenderEngine.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
     <ClCompile Include="Graphics\DXShader.cpp">
@@ -75,13 +87,7 @@
     <ClCompile Include="Graphics\DXTextureSystem.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
-    <ClCompile Include="Graphics\DXQuadMesh.cpp">
-      <Filter>Source Files\Graphics</Filter>
-    </ClCompile>
-    <ClCompile Include="Shaders\SimpleLight\SimpleLightShader.cpp">
-      <Filter>Source Files\Shaders\SimpleLight</Filter>
-    </ClCompile>
-    <ClCompile Include="Graphics\RenderFramebuffer.cpp">
+    <ClCompile Include="Graphics\HelperDXGraphics.cpp">
       <Filter>Source Files\Graphics</Filter>
     </ClCompile>
   </ItemGroup>
@@ -98,22 +104,37 @@
     <ClInclude Include="GameEngine.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\DXRenderEngine.h">
+    <ClInclude Include="Time.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\ShaderCollectionHeader.h">
+      <Filter>Header Files\Shader</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\Generic\GenericShader.h">
+      <Filter>Header Files\Shader\Generic</Filter>
+    </ClInclude>
+    <ClInclude Include="Shaders\SimpleLight\SimpleLightShader.h">
+      <Filter>Header Files\Shader\SimpleLight</Filter>
+    </ClInclude>
+    <ClInclude Include="MathEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\ADXRenderComponent.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\HelperDXGraphics.h">
-      <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\GraphicsHeader.h">
+    <ClInclude Include="Graphics\Camera.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\d3dx12.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Time.h">
-      <Filter>Header Files</Filter>
+    <ClInclude Include="Graphics\DXDeferedRenderer.h">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\ADXRenderComponent.h">
+    <ClInclude Include="Graphics\DXFramebuffer.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\DXMesh.h">
@@ -122,11 +143,14 @@
     <ClInclude Include="Graphics\DXMeshSystem.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\DXShader.h">
+    <ClInclude Include="Graphics\DXQuadMesh.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\ShaderCollectionHeader.h">
-      <Filter>Header Files\Shader</Filter>
+    <ClInclude Include="Graphics\DXRenderEngine.h">
+      <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXShader.h">
+      <Filter>Header Files\Graphics</Filter>
     </ClInclude>
     <ClInclude Include="Graphics\DXTexture.h">
       <Filter>Header Files\Graphics</Filter>
@@ -134,20 +158,11 @@
     <ClInclude Include="Graphics\DXTextureSystem.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Shaders\Generic\GenericShader.h">
-      <Filter>Header Files\Shader\Generic</Filter>
-    </ClInclude>
-    <ClInclude Include="Shaders\SimpleLight\SimpleLightShader.h">
-      <Filter>Header Files\Shader\SimpleLight</Filter>
-    </ClInclude>
-    <ClInclude Include="Graphics\DXQuadMesh.h">
+    <ClInclude Include="Graphics\GraphicsHeader.h">
       <Filter>Header Files\Graphics</Filter>
     </ClInclude>
-    <ClInclude Include="Graphics\RenderFramebuffer.h">
+    <ClInclude Include="Graphics\HelperDXGraphics.h">
       <Filter>Header Files\Graphics</Filter>
-    </ClInclude>
-    <ClInclude Include="MathEngine.h">
-      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ADXRenderComponent.h"
-#include "RenderFramebuffer.h"
+#include "DXDeferedRenderer.h"
 #include "../Shaders/SimpleLight/SimpleLightShader.h"
 #include "DXQuadMesh.h"
 
@@ -51,7 +51,7 @@ private:
 
 	bool msaaEnable = true;
 	unsigned int maxMsaaVal = 8;
-	unsigned int minMsaaVal = 2;
+	unsigned int minMsaaVal = 1;
 
 	Microsoft::WRL::ComPtr<ID3D12Fence> fence = nullptr;
 	unsigned long long fenceValue = 0;
@@ -96,7 +96,7 @@ private:
 	void PREP_RENDER_COMPONENT()
 	{
 #ifdef _DEBUG
-		renderComponent.Initialize(this->device, this->mainCommandList, this->framebuffer.NumberOfRT(), this->framebuffer.GetRTFormats(), this->depthStencilFormat, this->GetMeshSystem(), this->GetTextureSystem(), (this->msaaEnable)? this->maxMsaaVal : this->minMsaaVal);
+		renderComponent.Initialize(this->device, this->mainCommandList, this->deferedRenderer.NumberOfRT(), this->deferedRenderer.GetRTFormats(), this->depthStencilFormat, this->GetMeshSystem(), this->GetTextureSystem(), (this->msaaEnable)? this->maxMsaaVal : this->minMsaaVal);
 #endif // _DEBUG
 	}
 	void UPDATE_RENDER_COMPONENT()
@@ -109,7 +109,7 @@ private:
 	{
 		OutputDebugStringA("Called by thread.\n");
 	}
-	RenderFramebuffer framebuffer;
+	DXDeferedRenderer deferedRenderer;
 	// Post - process shader.
 	DXShader* ppShader = nullptr;
 	DXQuadMesh* quadMesh = nullptr;
@@ -141,4 +141,7 @@ public:
 	static Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> GetMainCommandList();
 	DXMeshSystem* GetMeshSystem();
 	DXTextureSystem* GetTextureSystem();
+
+	Transform* cameraTransform = nullptr;
+	MainCamera* mainCamera;
 };

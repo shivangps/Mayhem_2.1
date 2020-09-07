@@ -17,6 +17,8 @@ private:
 	Microsoft::WRL::ComPtr<ID3D12Resource> resource = nullptr;
 	D3D12_RESOURCE_STATES currentState = D3D12_RESOURCE_STATE_PRESENT;
 
+	unsigned int msaaSamples = 0;
+
 public:
 	// Function to initialize resource.
 	void InitializeAsDefault(Microsoft::WRL::ComPtr<ID3D12Device5> device, D3D12_RESOURCE_DESC* description, D3D12_RESOURCE_STATES setState, D3D12_CLEAR_VALUE* clearValue);
@@ -35,6 +37,8 @@ public:
 	D3D12_RESOURCE_STATES GetState();
 	// Function to GPU virtual address.
 	D3D12_GPU_VIRTUAL_ADDRESS GetGPUVirtualAddress();
+	// Function to get the msaa samples of the resource.
+	unsigned int GetMsaaSamples();
 
 	// Function to map the contents of the resource to store resource data.
 	void Map(unsigned int Subresource, D3D12_RANGE* pReadRange, void** ppData);

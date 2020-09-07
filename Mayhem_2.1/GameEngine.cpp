@@ -38,6 +38,9 @@ void GameEngine::GameLoop()
 		// Reset the frame time.
 		this->time->ResetFrameTime();
 
+		// Update the state of the render engine.
+		this->renderEngine->UpdateGraphicsState();
+
 		// Render all the objects to the screen.
 		this->renderEngine->RenderOnScreen();
 	}

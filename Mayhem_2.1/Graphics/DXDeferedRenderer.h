@@ -1,32 +1,39 @@
 #pragma once
 #include "HelperDXGraphics.h"
+#include "DXFramebuffer.h"
 
 // This header file contains the a class with framebuffer implementation for deferred renderering.
 
-class RenderFramebuffer
+enum DeferedBuffers
+{
+	FragmentPosition = 0,
+	Albedo,
+	Normal,
+	SpecularGloss
+};
+
+class DXDeferedRenderer
 {
 public:
-	RenderFramebuffer() {}
-	~RenderFramebuffer() {}
+	DXDeferedRenderer() {}
+	~DXDeferedRenderer() {}
 
 private:
 	// Descriptor Heaps.
 	DXDescriptorHeap rtvHeap = {};
 	DXDescriptorHeap depthHeap = {};
 
+	// Creation of Framebuffers.
+	DXFramebuffer fragmentPositionFramebuffer = {};
+	DXFramebuffer albedoFramebuffer = {};
+	DXFramebuffer normalFramebuffer = {};
+	DXFramebuffer specularGlossFramebuffer = {};
+	DXFramebuffer depthFramebuffer = {};
+
 	// Shader Resource Buffers.
 	static const unsigned int numBuffers = 4;
-	DXResource gBuffersRTV[numBuffers] = {};
-	DXResource gBuffersSRV[numBuffers] = {};
 	DXGI_FORMAT gBufferFormat[numBuffers] = { DXGI_FORMAT_R11G11B10_FLOAT, DXGI_FORMAT_R11G11B10_FLOAT, DXGI_FORMAT_R8G8B8A8_SNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
 
-	DXResource depthBufferRTV = {};
-	DXResource depthBufferSRV = {};
-	DXGI_FORMAT dsvRTFormat = DXGI_FORMAT_D24_UNORM_S8_UINT;
-	DXGI_FORMAT dsvSRFormat = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
-
-	// Function to set RenderFramebuffer view to handle.
-	void SetFramebufferToHandle(Microsoft::WRL::ComPtr<ID3D12Device5> device, unsigned int index, D3D12_CPU_DESCRIPTOR_HANDLE handle);
 	// Function to copy the content of resource from MSAA to non-MSAA resource.
 	void CopyResources(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);
 

@@ -66,13 +66,15 @@ void ADXRenderComponent::UpdateState()
 	model = this->transform_object_1.GetGlobalModel();
 
 	// VIEW
-	Vector3 cameraPosition(0.0f, 0.0f, -5.0f);
-	Vector3 targetLookPos;
-	Vector3 upPosition(0.0f, 1.0f, 0.0f);
-	view = DirectX::XMMatrixLookAtLH(cameraPosition.GetVector(), targetLookPos.GetVector(), upPosition.GetVector());
+	//Vector3 cameraPosition(0.0f, 0.0f, -5.0f);
+	//Vector3 targetLookPos;
+	//Vector3 upPosition(0.0f, 1.0f, 0.0f);
+	//view = DirectX::XMMatrixLookAtLH(cameraPosition.GetVector(), targetLookPos.GetVector(), upPosition.GetVector());
+	view = MainCamera::GetInstance()->GetViewMatrix();
 
 	// PROJECTION
-	projection = DirectX::XMMatrixPerspectiveFovLH(45.0f, (float)this->application->GetWidth() / (float)this->application->GetHeight(), 0.1f, 100.0f);
+	//projection = DirectX::XMMatrixPerspectiveFovLH(45.0f, (float)this->application->GetWidth() / (float)this->application->GetHeight(), 0.1f, 100.0f);
+	projection = MainCamera::GetInstance()->GetProjectionMatrix();
 
 	// MVP
 	Matrix4 mvpMatrix = model * view * projection;

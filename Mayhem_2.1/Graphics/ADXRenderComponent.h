@@ -4,6 +4,7 @@
 #include "../Shaders/ShaderCollectionHeader.h"
 #include "DXTexture.h"
 #include "../MathEngine.h"
+#include "Camera.h"
 
 struct SatCBuffer
 {

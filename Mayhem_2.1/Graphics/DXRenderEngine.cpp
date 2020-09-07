@@ -13,11 +13,11 @@ void DXRenderEngine::SETFRAMEBUFFERHEAP()
 	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(1));
 	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(2));
 	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(3));
-	this->framebuffer.SetFragPosFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(0));
-	this->framebuffer.SetColorFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(1));
-	this->framebuffer.SetNormalFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(2));
-	this->framebuffer.SetSpecularFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(3));
-	this->framebuffer.SetDepthFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(4));
+	this->deferedRenderer.SetFragPosFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(0));
+	this->deferedRenderer.SetColorFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(1));
+	this->deferedRenderer.SetNormalFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(2));
+	this->deferedRenderer.SetSpecularFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(3));
+	this->deferedRenderer.SetDepthFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(4));
 }
 
 // DirectX Graphics class functions.
@@ -58,12 +58,25 @@ void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int heig
 	if (t[0].joinable())
 		t[0].join();
 
-	this->framebuffer.Initialize(this->device, width, height, (this->msaaEnable) ? this->maxMsaaVal : this->minMsaaVal);
+	this->deferedRenderer.Initialize(this->device, width, height, (this->msaaEnable) ? this->maxMsaaVal : this->minMsaaVal);
 	this->ppShader = SimpleLight::Shader::GetInstance();
 	ppShader->Initilaize(this->device, 1, &this->renderOutputFormat, this->depthStencilFormat, 1);
 	this->quadMesh = DXQuadMesh::GetInstance();
 	this->quadMesh->Initialize(this->device);
 	this->SETFRAMEBUFFERHEAP();
+
+	this->mainCamera = MainCamera::GetInstance();
+	this->mainCamera->windowWidth = width;
+	this->mainCamera->windowHeight = height;
+
+	this->cameraTransform = new Transform();
+	this->cameraTransform->SetPosition(0.0f, 0.0f, -10.0f);
+	this->cameraTransform->SetRotation(0.0f, 0.0f, 0.0f);
+	Camera* newCamera = new Camera(cameraTransform, this->mainCamera->GetWindowWidth(), this->mainCamera->GetWindowHeight());
+	newCamera->SetNearClip(0.01f);
+	newCamera->SetFarClip(1000.0f);
+	newCamera->SetFOV(45.0f);
+	mainCamera->currentMainCamera = newCamera;
 
 	// Flush all the commands after all initialization.
 	this->FlushCommands();
@@ -288,7 +301,7 @@ void DXRenderEngine::FlushCommands()
 
 void DXRenderEngine::UpdateGraphicsState()
 {
-
+	this->mainCamera->UpdateCameraValues();
 }
 
 void DXRenderEngine::PresentFrame()
@@ -328,39 +341,39 @@ void DXRenderEngine::RenderOnScreen()
 	//////////////////////// ALL RENDERING COMMANDS MUST TAKE PLACE FROM HERE ON ////////////////////////////
 	
 	// Get render target CPU handle appropriately based on MSAA being enabled.
-	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = {};
-	rtvHandle = this->rtvDescriptorHeap.GetCPUHandle(this->currentFrame);
-	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = {};
-	dsvHandle = this->dsvDescriptorHeap.GetCPUHandle(0);
+	D3D12_CPU_DESCRIPTOR_HANDLE rtvHandle = {};	//C
+	rtvHandle = this->rtvDescriptorHeap.GetCPUHandle(this->currentFrame);	//C
+	D3D12_CPU_DESCRIPTOR_HANDLE dsvHandle = {};	//C
+	dsvHandle = this->dsvDescriptorHeap.GetCPUHandle(0);	//C
 
 	// Clear the render buffer with a specific color/value.
-	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };
-	this->mainCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);
+	float clearColor[4] = { 0.0f, 0.0f, 0.0f, 1.0f };	//C
+	this->mainCommandList->ClearRenderTargetView(rtvHandle, clearColor, 0, nullptr);	//C
 
 	// Clear depth stencil buffer.
-	this->mainCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);
+	this->mainCommandList->ClearDepthStencilView(dsvHandle, D3D12_CLEAR_FLAG_DEPTH | D3D12_CLEAR_FLAG_STENCIL, 1.0f, 0, 0, nullptr);	//C
 
 	// Setting up the framebuffer.
-	this->framebuffer.SetFramebuffer(this->mainCommandList);
+	this->deferedRenderer.SetFramebuffer(this->mainCommandList);	//C
 
-	this->UPDATE_RENDER_COMPONENT();
+	this->UPDATE_RENDER_COMPONENT();	//C
 
 	// Removing the framebuffer.
-	this->framebuffer.RemoveFramebuffer(this->mainCommandList, 1, &rtvHandle, &dsvHandle);
+	this->deferedRenderer.RemoveFramebuffer(this->mainCommandList, 1, &rtvHandle, &dsvHandle);	//C
 
 	// Setup the post processing shader.
-	this->ppShader->SetRenderDXShader(this->mainCommandList);
+	this->ppShader->SetRenderDXShader(this->mainCommandList);	//C
 
-	ID3D12DescriptorHeap* ppHeaps[] = { this->framebufferheap.Get() };
-	this->mainCommandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);
+	ID3D12DescriptorHeap* ppHeaps[] = { this->framebufferheap.Get() };	//C
+	this->mainCommandList->SetDescriptorHeaps(_countof(ppHeaps), ppHeaps);	//C
 
-	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::FragPosTex, this->framebufferheap.GetGPUHandle(0));
-	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::ColorTex, this->framebufferheap.GetGPUHandle(1));
-	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::NormalTex, this->framebufferheap.GetGPUHandle(2));
-	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::SpecGlossTex, this->framebufferheap.GetGPUHandle(3));
-	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::DepthTex, this->framebufferheap.GetGPUHandle(4));
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::FragPosTex, this->framebufferheap.GetGPUHandle(0));	//C
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::ColorTex, this->framebufferheap.GetGPUHandle(1));	//C
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::NormalTex, this->framebufferheap.GetGPUHandle(2));	//C
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::SpecGlossTex, this->framebufferheap.GetGPUHandle(3));	//C
+	this->mainCommandList->SetGraphicsRootDescriptorTable(SimpleLight::DepthTex, this->framebufferheap.GetGPUHandle(4));	//C
 
-	this->quadMesh->DrawQuad(this->mainCommandList);
+	this->quadMesh->DrawQuad(this->mainCommandList);	//C
 
 	///////////////////////////////// RENDERING COMMANDS ENDS HERE //////////////////////////////////////////
 
