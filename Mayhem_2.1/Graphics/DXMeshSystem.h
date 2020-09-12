@@ -1,5 +1,6 @@
 #pragma once
 #include "DXMesh.h"
+#include "DXTextureSystem.h"
 
 // This header contains the class DXMeshSystem.
 // Following the ECS this system contins a collection of single instance mesh.
@@ -10,6 +11,11 @@ struct DXModel
 public:
 	std::string fileName;
 	std::vector<DXMesh> meshes;
+	std::vector<unsigned int> albedoIndex;
+	std::vector<unsigned int> normalIndex;
+	std::vector<unsigned int> metallicIndex;
+	std::vector<unsigned int> roughnessIndex;
+	std::vector<unsigned int> ambientOcclusionIndex;
 };
 
 class DXMeshSystem

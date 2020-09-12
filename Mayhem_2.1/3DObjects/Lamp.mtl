@@ -1,7 +1,7 @@
 # Blender MTL File: 'Lamp.blend'
 # Material Count: 1
 
-newmtl Granite_Material
+newmtl Concrete_Material
 Ns 323.999994
 Ka 1.000000 1.000000 1.000000
 Kd 0.800000 0.800000 0.800000
@@ -10,5 +10,5 @@ Ke 0.000000 0.000000 0.000000
 Ni 1.450000
 d 1.000000
 illum 2
-map_Kd D:\\Documents\\Japanese Garden\\Models\\Concrete_Wall\\Concrete_Wall_001_Base_Color.jpg
-map_Ns D:\\Documents\\Japanese Garden\\Models\\Concrete_Wall\\Concrete_Wall_001_Roughness.jpg
+map_Kd D:\\Documents\\Graphix_Projex\\M_2.1\\Mayhem_2.1\\Mayhem_2.1\\Textures\\Concrete_Wall\\Concrete_Wall_Albedo.jpg
+map_Ns D:\\Documents\\Graphix_Projex\\M_2.1\\Mayhem_2.1\\Mayhem_2.1\\Textures\\Concrete_Wall\\Concrete_Wall_Roughness.jpg

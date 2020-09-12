@@ -37,6 +37,12 @@
     <Filter Include="Source Files\Graphics">
       <UniqueIdentifier>{907e9a3b-dead-405e-9992-17799b4db23c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Shaders\PBR">
+      <UniqueIdentifier>{701936cc-a43a-4010-a669-3e3b334a778a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Header Files\Shader\PBR">
+      <UniqueIdentifier>{1ab7a98d-c6d8-4a57-83a3-d0fd4672e079}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
@@ -89,6 +95,9 @@
     </ClCompile>
     <ClCompile Include="Graphics\HelperDXGraphics.cpp">
       <Filter>Source Files\Graphics</Filter>
+    </ClCompile>
+    <ClCompile Include="Graphics\DXRenderComponent.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -163,6 +172,9 @@
     </ClInclude>
     <ClInclude Include="Graphics\HelperDXGraphics.h">
       <Filter>Header Files\Graphics</Filter>
+    </ClInclude>
+    <ClInclude Include="Graphics\DXRenderComponent.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -3,7 +3,7 @@
 void DXMeshSystem::LoadModel(const Microsoft::WRL::ComPtr<ID3D12Device5> device, const Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, std::string fileLocation, DXModel* model)
 {
 	Assimp::Importer import;
-	const aiScene* scene = import.ReadFile(fileLocation, aiProcess_Triangulate | aiProcess_FlipUVs);
+	const aiScene* scene = import.ReadFile(fileLocation, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_ConvertToLeftHanded);
 
 	if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode)
 	{

@@ -8,11 +8,6 @@ Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> DXRenderEngine::mainCommandLi
 void DXRenderEngine::SETFRAMEBUFFERHEAP()
 {
 	this->framebufferheap.Initialize(this->device, 10, D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV, D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE);
-	//unsigned int textureIndex = this->textureSystem.RegisterTexture(this->device, this->mainCommandList, "Textures/container2.png");
-	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(0));
-	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(1));
-	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(2));
-	//this->textureSystem.CreateResourceView(textureIndex, this->device, this->framebufferheap.GetCPUHandle(3));
 	this->deferedRenderer.SetFragPosFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(0));
 	this->deferedRenderer.SetColorFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(1));
 	this->deferedRenderer.SetNormalFramebufferToHandle(device, this->framebufferheap.GetCPUHandle(2));
@@ -70,7 +65,7 @@ void DXRenderEngine::Initialize(HWND hWnd, unsigned int width, unsigned int heig
 	this->mainCamera->windowHeight = height;
 
 	this->cameraTransform = new Transform();
-	this->cameraTransform->SetPosition(0.0f, 0.0f, -10.0f);
+	this->cameraTransform->SetPosition(0.0f, 0.0f, 10.0f);
 	this->cameraTransform->SetRotation(0.0f, 0.0f, 0.0f);
 	Camera* newCamera = new Camera(cameraTransform, this->mainCamera->GetWindowWidth(), this->mainCamera->GetWindowHeight());
 	newCamera->SetNearClip(0.01f);

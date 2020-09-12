@@ -21,7 +21,7 @@ void MainCamera::CalculateCameraPerspectiveMatrix()
 	// Calculate the updated view matrix.
 	Vector3 position = cameraTransform.GetPosition();
 	Vector3 targetPosition = cameraTransform.GetPosition() + cameraTransform.GetLocalForward();
-	Vector3 upPosition = cameraTransform.GetLocalUp();
+	Vector3 upPosition = cameraTransform.GetLocalDown();
 	this->view = DirectX::XMMatrixLookAtLH(position.GetVector(), targetPosition.GetVector(), upPosition.GetVector());
 
 	// Calculate the updated projection matrix.

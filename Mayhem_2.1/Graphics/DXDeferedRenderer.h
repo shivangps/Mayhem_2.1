@@ -32,7 +32,7 @@ private:
 
 	// Shader Resource Buffers.
 	static const unsigned int numBuffers = 4;
-	DXGI_FORMAT gBufferFormat[numBuffers] = { DXGI_FORMAT_R11G11B10_FLOAT, DXGI_FORMAT_R11G11B10_FLOAT, DXGI_FORMAT_R8G8B8A8_SNORM, DXGI_FORMAT_R8G8B8A8_UNORM };
+	DXGI_FORMAT gBufferFormat[numBuffers] = { DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT, DXGI_FORMAT_R32G32B32A32_FLOAT };
 
 	// Function to copy the content of resource from MSAA to non-MSAA resource.
 	void CopyResources(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList);

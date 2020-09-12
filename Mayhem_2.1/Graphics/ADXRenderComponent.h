@@ -1,21 +1,21 @@
 #pragma once
 #include "DXMeshSystem.h"
-#include "DXTextureSystem.h"
 #include "../Shaders/ShaderCollectionHeader.h"
 #include "DXTexture.h"
 #include "../MathEngine.h"
 #include "Camera.h"
 
-struct SatCBuffer
+struct GlobalCBuffer
 {
-	float saturation;
+	float ambientLight;
 };
 
-struct MatCBuffer
+struct LocalCBuffer
 {
 	Matrix4 TransformationMatrix;
 	Matrix4 ModelMatrix;
-	Matrix4 InvTrpModelMatrix;
+	Matrix4 ViewMatrix;
+	Matrix4 NormalMatrix;
 };
 
 class ADXRenderComponent
@@ -32,18 +32,18 @@ private:
 	DXDescriptorHeap cbv_srv_heap = {};
 
 	unsigned char* p_sat_cbv_begin = nullptr;
-	SatCBuffer saturation_data = {};
-	DXResource saturation_constant_resource = {};
+	GlobalCBuffer global_data = {};
+	DXResource global_constant_resource = {};
 
 	// object 1
-	unsigned char* p_mat_cbv_begin = nullptr;
-	MatCBuffer matrix_data = {};
-	DXResource matrix_constant_resource = {};
+	unsigned char* p_ob1_local_cbv_begin = nullptr;
+	LocalCBuffer ob1_local_data = {};
+	DXResource ob1_local_constant_resource = {};
 
 	// object 2
-	unsigned char* p_ob2_mat_cbv_begin = nullptr;
-	MatCBuffer ob2_matrix_data = {};
-	DXResource ob2_matrix_constant_resource = {};
+	unsigned char* p_ob2_local_cbv_begin = nullptr;
+	LocalCBuffer ob2_local_data = {};
+	DXResource ob2_local_constant_resource = {};
 
 	Win32Application* application = nullptr;
 

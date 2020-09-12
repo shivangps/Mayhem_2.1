@@ -1,5 +1,14 @@
 #include "ADXRenderComponent.h"
 
+static DirectX::XMMATRIX InverseTranspose(DirectX::CXMMATRIX M)
+{
+	DirectX::XMMATRIX A;
+	A.r[3] = DirectX::XMVectorSet(0.0f, 0.0f, 0.0f, 1.0f);
+
+	DirectX::XMVECTOR det = DirectX::XMMatrixDeterminant(A);
+	return DirectX::XMMatrixTranspose(DirectX::XMMatrixInverse(&det, A));
+}
+
 void ADXRenderComponent::Initialize(Microsoft::WRL::ComPtr<ID3D12Device5> device, Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList,
 	unsigned int numRT, DXGI_FORMAT renderTargetFormats[], DXGI_FORMAT depthStencilFormat, DXMeshSystem* meshSystem, DXTextureSystem* textureSystem,
 	 unsigned int samples)
@@ -27,17 +36,17 @@ void ADXRenderComponent::InitializeBuffers(Microsoft::WRL::ComPtr<ID3D12Device5>
 
 	// Create constant buffer view for saturation value(float).
 	{
-		this->p_sat_cbv_begin = CreateConstantBuffer(device, &this->saturation_constant_resource, sizeof(SatCBuffer), this->cbv_srv_heap.GetCPUHandle(0), L"Saturation Constant Buffer");
+		this->p_sat_cbv_begin = CreateConstantBuffer(device, &this->global_constant_resource, sizeof(GlobalCBuffer), this->cbv_srv_heap.GetCPUHandle(0), L"Saturation Constant Buffer");
 	}
 
 	// Create constant buffer view for transformation matrix. (for object 1)
 	{
-		this->p_mat_cbv_begin = CreateConstantBuffer(device, &this->matrix_constant_resource, sizeof(MatCBuffer), this->cbv_srv_heap.GetCPUHandle(1), L"Second Object Matrix Constant Buffer");
+		this->p_ob1_local_cbv_begin = CreateConstantBuffer(device, &this->ob1_local_constant_resource, sizeof(LocalCBuffer), this->cbv_srv_heap.GetCPUHandle(1), L"Second Object Matrix Constant Buffer");
 	}
 
 	// Create constant buffer view for transformation matrix. (for object 2)
 	{
-		this->p_ob2_mat_cbv_begin = CreateConstantBuffer(device, &this->ob2_matrix_constant_resource, sizeof(MatCBuffer), this->cbv_srv_heap.GetCPUHandle(3), L"Second Object Matrix Constant Buffer");
+		this->p_ob2_local_cbv_begin = CreateConstantBuffer(device, &this->ob2_local_constant_resource, sizeof(LocalCBuffer), this->cbv_srv_heap.GetCPUHandle(3), L"Second Object Matrix Constant Buffer");
 	}
 
 	// Create shader resource view for texture buffer.
@@ -53,22 +62,21 @@ void ADXRenderComponent::UpdateState()
 	Time* time = Time::GetInstance();
 
 	// Saturation constant buffer.
-	this->saturation_data.saturation = 0.05f;
-	memcpy(this->p_sat_cbv_begin, &saturation_data, sizeof(saturation_data));
+	this->global_data.ambientLight = 0.05f;
+	memcpy(this->p_sat_cbv_begin, &global_data, sizeof(global_data));
 
 	// OBJECT - 1
 	// Matrix constant buffer.
 	Matrix4 model, view, projection;
 
-	this->transform_object_1.SetPosition(1.0f, 0.0f, 0.0f);
-	this->transform_object_1.SetScale(Vector3(0.5f));
-	this->transform_object_1.SetRotation(0.0f, time->GetCurrentStartTime() / 10.0f, 0.0f);
+	this->transform_object_1.SetPosition(2.0f, 0.0f, 0.0f);
+	this->transform_object_1.SetRotation(0.0f, time->GetCurrentStartTime() / 30.0f, 0.0f);
 	model = this->transform_object_1.GetGlobalModel();
 
 	// VIEW
-	//Vector3 cameraPosition(0.0f, 0.0f, -5.0f);
+	//Vector3 cameraPosition(0.0f, 0.0f, 5.0f);
 	//Vector3 targetLookPos;
-	//Vector3 upPosition(0.0f, 1.0f, 0.0f);
+	//Vector3 upPosition(0.0f, -1.0f, 0.0f);
 	//view = DirectX::XMMatrixLookAtLH(cameraPosition.GetVector(), targetLookPos.GetVector(), upPosition.GetVector());
 	view = MainCamera::GetInstance()->GetViewMatrix();
 
@@ -79,23 +87,25 @@ void ADXRenderComponent::UpdateState()
 	// MVP
 	Matrix4 mvpMatrix = model * view * projection;
 
-	this->matrix_data.TransformationMatrix = mvpMatrix.Transpose();
-	this->matrix_data.ModelMatrix = model;
-	this->matrix_data.InvTrpModelMatrix = model.Inverse(model.Determinant());
-	memcpy(this->p_mat_cbv_begin, &this->matrix_data, sizeof(this->matrix_data));
+	this->ob1_local_data.TransformationMatrix = mvpMatrix.Transpose();
+	this->ob1_local_data.ModelMatrix = model.Transpose();
+	this->ob1_local_data.ViewMatrix = view.Transpose();
+	this->ob1_local_data.NormalMatrix = model.Inverse();
+	memcpy(this->p_ob1_local_cbv_begin, &this->ob1_local_data, sizeof(this->ob1_local_data));
 
 	// OBJECT - 2
-	this->transform_object_2.SetPosition(-3.0f, 0.0f, 0.0f);
+	this->transform_object_2.SetPosition(5.0f, 0.0f, 0.0f);
 	this->transform_object_2.SetScale(Vector3(1.0f));
-	this->transform_object_2.SetRotation(0.0f, -time->GetCurrentStartTime() / 10.0f, 0.0f);
+	this->transform_object_2.SetRotation(0.0f, time->GetCurrentStartTime() / 10.0f, 0.0f);
 	model = this->transform_object_2.GetGlobalModel();
-
+	
 	mvpMatrix = model * view * projection;
-
-	this->ob2_matrix_data.TransformationMatrix = mvpMatrix.Transpose();
-	this->ob2_matrix_data.ModelMatrix = model;
-	this->ob2_matrix_data.InvTrpModelMatrix = model.Inverse(model.Determinant());
-	memcpy(this->p_ob2_mat_cbv_begin, &this->ob2_matrix_data, sizeof(this->ob2_matrix_data));
+	
+	this->ob2_local_data.TransformationMatrix = mvpMatrix.Transpose();
+	this->ob2_local_data.ModelMatrix = model.Transpose();
+	this->ob2_local_data.ViewMatrix = view.Transpose();
+	this->ob2_local_data.NormalMatrix = model.Inverse();
+	memcpy(this->p_ob2_local_cbv_begin, &this->ob2_local_data, sizeof(this->ob2_local_data));
 }
 
 void ADXRenderComponent::Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList4> commandList, DXMeshSystem* meshSystem)
@@ -114,7 +124,7 @@ void ADXRenderComponent::Update(Microsoft::WRL::ComPtr<ID3D12GraphicsCommandList
 	meshSystem->DrawMesh(this->meshIndex, 1, commandList);
 
 	commandList->SetGraphicsRootDescriptorTable(GenericShader::Matrix, this->cbv_srv_heap.GetGPUHandle(3));
-
+	
 	meshSystem->DrawMesh(this->meshIndex, 1, commandList);
 }
 

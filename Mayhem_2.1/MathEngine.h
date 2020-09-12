@@ -154,9 +154,13 @@ public:
 	{
 		return DirectX::XMMatrixTranspose(this->GetMatrix());
 	}
-	Matrix4 Inverse(DirectX::XMVECTOR vector)
+	Matrix4 Inverse(DirectX::XMVECTOR* vector)
 	{
-		return DirectX::XMMatrixInverse(&vector, this->GetMatrix());
+		return DirectX::XMMatrixInverse(vector, this->GetMatrix());
+	}
+	Matrix4 Inverse()
+	{
+		return DirectX::XMMatrixInverse(&this->Determinant(), this->GetMatrix());
 	}
 	Matrix4 Translation(Vector3 vector)
 	{
@@ -182,7 +186,7 @@ public:
 // Constants that store the normalized values of 3 axes.
 const DirectX::XMVECTOR global_right = DirectX::XMVectorSet(1.0f, 0.0f, 0.0f, 0.0f);
 const DirectX::XMVECTOR global_up = DirectX::XMVectorSet(0.0f, 1.0f, 0.0f, 0.0f);
-const DirectX::XMVECTOR global_forward = DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f);
+const DirectX::XMVECTOR global_forward = DirectX::XMVectorSet(0.0f, 0.0f, -1.0f, 0.0f);
 
 // Transform contains the position rotation and scale data of an object.
 // Also allows operation on data.
@@ -201,19 +205,17 @@ private:
 
 	void CalculateNewLocalAxes()
 	{
-		Matrix4 rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(rotation.X()), DirectX::XMConvertToRadians(rotation.Y()), DirectX::XMConvertToRadians(rotation.Z()));
-		this->local_right = DirectX::XMVector3TransformCoord(global_right, rotationMatrix.GetMatrix());
-		this->local_up = DirectX::XMVector3TransformCoord(global_up, rotationMatrix.GetMatrix());
-		this->local_forward = DirectX::XMVector3TransformCoord(global_forward, rotationMatrix.GetMatrix());
+		Matrix4 rotationMatrix = DirectX::XMMatrixRotationRollPitchYaw(DirectX::XMConvertToRadians(rotation.X()), DirectX::XMConvertToRadians(rotation.Y()), 0.0f);
+		this->local_right = DirectX::XMVector3Normalize(DirectX::XMVector3TransformCoord(global_right, rotationMatrix.GetMatrix()));
+		this->local_up = DirectX::XMVector3Normalize(DirectX::XMVector3TransformCoord(global_up, rotationMatrix.GetMatrix()));
+		this->local_forward = DirectX::XMVector3Normalize(DirectX::XMVector3TransformCoord(global_forward, rotationMatrix.GetMatrix()));
 	}
 
 public:
 	Transform()
 	{
 		this->scale = Vector3(1.0f);
-		this->local_right = global_right;
-		this->local_up = global_up;
-		this->local_forward = global_forward;
+		this->CalculateNewLocalAxes();
 	}
 
 	// Get and Set functions.
@@ -338,8 +340,8 @@ public:
 	{
 		Matrix4 model;
 		model = model.Translation(this->position);
-		model = model.Scale(this->scale);
 		model = model.Rotation(this->rotation);
+		model = model.Scale(this->scale);
 		if (this->HasParent())
 		{
 			Matrix4 parentModel = parent->GetGlobalModel();
@@ -352,8 +354,8 @@ public:
 	{
 		Matrix4 model;
 		model = model.Translation(this->position);
-		model = model.Scale(this->scale);
 		model = model.Rotation(this->rotation);
+		model = model.Scale(this->scale);
 		return model;
 	}
 };
